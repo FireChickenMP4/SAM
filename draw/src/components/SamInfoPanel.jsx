@@ -30,7 +30,7 @@ function SamTable({ title, columns, rows }) {
 }
 
 export default function SamInfoPanel({ samData }) {
-  if (!samData) return null;
+  if (!samData || !samData.sam) return null;
 
   const { sam } = samData;
   const terminals = sam.getTerminals();

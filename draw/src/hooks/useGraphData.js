@@ -75,7 +75,12 @@ export function useGraphData() {
         label: n.label || n.id,
         group: n.group || '默认',
       }));
-    const newEdges = (data.edges || [])
+
+    let rawEdges = data.edges;
+    if (!rawEdges && (data.transEdges || data.linkEdges)) {
+      rawEdges = [...(data.transEdges || []), ...(data.linkEdges || [])];
+    }
+    const newEdges = (rawEdges || [])
       .filter(e => e.source && e.target)
       .map((e, i) => ({
         id: e.id || `e${++edgeCounter}`,

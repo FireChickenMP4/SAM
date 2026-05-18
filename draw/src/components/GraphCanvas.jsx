@@ -76,6 +76,13 @@ const CY_STYLE = [
       'width': 5,
     },
   },
+  {
+    selector: 'node[?isNew]',
+    style: {
+      'border-width': 3,
+      'border-color': '#FFD700',
+    },
+  },
 ];
 
 function buildElements(nodes, edges) {
@@ -86,7 +93,9 @@ function buildElements(nodes, edges) {
       label: n.label || n.id,
       color: GROUP_COLORS[n.group] || GROUP_COLORS['默认'],
       group: n.group,
+      isNew: n.isNew || false,
     },
+    classes: n.isNew ? 'new-node' : '',
   }));
 
   const cyEdges = edges.map(e => ({
@@ -98,6 +107,7 @@ function buildElements(nodes, edges) {
       weight: e.weight,
       label: e.label !== undefined ? e.label : String(e.weight),
       edgeType: e.edgeType || 'default',
+      isNew: e.isNew || false,
     },
   }));
 
@@ -112,10 +122,12 @@ export default function GraphCanvas({
   onDeleteEdge,
   onUpdateNode,
   onUpdateEdge,
+  pendingPositions,
 }) {
   const containerRef = useRef(null);
   const [selected, setSelected] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const prevNodeIds = useRef(new Set());
 
   const initCy = useCallback(() => {
     if (!containerRef.current || cyRef.current) return;
@@ -128,7 +140,7 @@ export default function GraphCanvas({
       maxZoom: 5,
     });
 
-    cy.on('tap', 'node', evt => {
+    cy.on('dbltap', 'node', evt => {
       const node = evt.target;
       setSelected({ type: 'node', id: node.id() });
       setEditForm({
@@ -137,7 +149,7 @@ export default function GraphCanvas({
       });
     });
 
-    cy.on('tap', 'edge', evt => {
+    cy.on('dbltap', 'edge', evt => {
       const edge = evt.target;
       setSelected({ type: 'edge', id: edge.id() });
       setEditForm({
@@ -166,18 +178,47 @@ export default function GraphCanvas({
     const cy = cyRef.current;
     if (!cy) return;
 
+    const oldIds = prevNodeIds.current;
+    const currentIds = new Set(nodes.map(n => n.id));
+    const newNodeIds = new Set(nodes.filter(n => !oldIds.has(n.id)).map(n => n.id));
+    prevNodeIds.current = currentIds;
+
+    const pos = pendingPositions?.current || null;
+    if (pendingPositions) pendingPositions.current = null;
+
     const els = buildElements(nodes, edges);
     cy.batch(() => {
       cy.elements().remove();
       cy.add(els);
     });
 
-    if (els.length > 0 && nodes.length > 0) {
+    if (pos) {
+      cy.nodes().forEach(n => {
+        const saved = pos[n.id()];
+        if (saved) n.position(saved);
+      });
+    }
+
+    const hasNewNodes = newNodeIds.size > 0;
+    if (hasNewNodes) {
+      setTimeout(() => {
+        cy.nodes(`[id="${[...newNodeIds].join('"], [id="')}"]`).forEach(n => {
+          n.style('border-color', '#FFD700');
+          n.style('border-width', 4);
+          n.animate({
+            style: { 'border-width': 2, 'border-color': '#fff' },
+            duration: 1500,
+          });
+        });
+      }, 100);
+    }
+
+    if (els.length > 0 && nodes.length > 0 && !pos) {
       setTimeout(() => {
         cy.layout({ name: 'dagre', rankDir: 'LR', spacingFactor: 1.3 }).run();
       }, 50);
     }
-  }, [nodes, edges, cyRef]);
+  }, [nodes, edges, cyRef, pendingPositions]);
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
@@ -270,20 +311,8 @@ export default function GraphCanvas({
             )}
             <div className="btn-row">
               <button type="submit" className="btn btn-primary btn-sm">保存</button>
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={() => setSelected(null)}
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger btn-sm"
-                onClick={handleDelete}
-              >
-                删除
-              </button>
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => setSelected(null)}>取消</button>
+              <button type="button" className="btn btn-danger btn-sm" onClick={handleDelete}>删除</button>
             </div>
           </form>
         </div>

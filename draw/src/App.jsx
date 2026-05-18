@@ -25,8 +25,16 @@ export default function App() {
   const [samLabelFormat, setSamLabelFormat] = useState('len');
   const [samData, setSamData] = useState(null);
   const autoLoaded = useRef(false);
+  const pendingPositions = useRef(null);
 
   const handleBuildSAM = useCallback((s, format = 'len') => {
+    const cy = cyRef.current;
+    if (cy) {
+      const pos = {};
+      cy.nodes().forEach(n => { pos[n.id()] = n.position(); });
+      pendingPositions.current = pos;
+    }
+
     const sam = new SAM();
     sam.build(s);
     const { nodes: samNodes, transEdges, linkEdges } = sam.toGraphData(format);
@@ -39,10 +47,56 @@ export default function App() {
       nodes: samNodes,
       edges: [...transEdges, ...linkEdges],
     });
-  }, [importData]);
+  }, [importData, cyRef]);
+
+  const handleExtendSAM = useCallback((chars) => {
+    if (!samData || !samData.sam) return;
+
+    const cy = cyRef.current;
+    if (cy) {
+      const pos = {};
+      cy.nodes().forEach(n => { pos[n.id()] = n.position(); });
+      pendingPositions.current = pos;
+    }
+
+    const sam = samData.sam;
+    for (const ch of chars) {
+      sam.extend(ch);
+    }
+    const newInput = samData.input + chars;
+    const { nodes: samNodes, transEdges, linkEdges } = sam.toGraphData(samLabelFormat);
+
+    setSamData({ sam, input: newInput });
+    importData({
+      nodes: samNodes,
+      edges: [...transEdges, ...linkEdges],
+    });
+  }, [samData, samLabelFormat, importData, cyRef]);
+
+  const handleImport = useCallback((data) => {
+    const isSamFormat = !!(data.transEdges || data.linkEdges);
+
+    if (isSamFormat && data.input) {
+      handleBuildSAM(data.input);
+      return true;
+    }
+
+    if (isSamFormat) {
+      importData({
+        nodes: data.nodes || [],
+        edges: [...(data.transEdges || []), ...(data.linkEdges || [])],
+      });
+      setSamData({ sam: null, input: data.input || null });
+      setSamView('combined');
+      return true;
+    }
+
+    setSamData(null);
+    return importData(data);
+  }, [importData, handleBuildSAM]);
 
   const handleToggleLabelFormat = useCallback(() => {
-    if (!samData) return;
+    if (!samData || !samData.sam) return;
     const nextFormat = samLabelFormat === 'len' ? 'string' : 'len';
     setSamLabelFormat(nextFormat);
     const { nodes: samNodes, transEdges, linkEdges } = samData.sam.toGraphData(nextFormat);
@@ -98,8 +152,11 @@ export default function App() {
           edges={edges}
           onAddNode={addNode}
           onAddEdge={addEdge}
-          onImport={importData}
+          onImport={handleImport}
           onBuildSAM={handleBuildSAM}
+          samActive={!!samData}
+          samInputStr={samData?.input}
+          onExtendSAM={handleExtendSAM}
         />
         {samData && <SamInfoPanel samData={samData} />}
       </div>
@@ -122,6 +179,7 @@ export default function App() {
           onDeleteEdge={deleteEdge}
           onUpdateNode={updateNode}
           onUpdateEdge={updateEdge}
+          pendingPositions={pendingPositions}
         />
       </div>
     </div>

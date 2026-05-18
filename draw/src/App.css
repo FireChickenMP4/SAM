@@ -24,8 +24,6 @@ html, body, #root {
   min-width: 340px;
   background: #fff;
   border-right: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
   overflow-y: auto;
 }
 
@@ -36,6 +34,9 @@ html, body, #root {
   color: #1a1a2e;
   border-bottom: 1px solid #e0e0e0;
   background: #fafbfc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* ===== Main Area ===== */
@@ -80,6 +81,47 @@ html, body, #root {
 .sam-input:focus {
   border-color: #096dd9;
   box-shadow: 0 0 0 2px rgba(75, 156, 211, 0.2);
+}
+
+/* ===== SAM Active Bar ===== */
+.sam-active-bar {
+  padding: 10px 20px;
+  background: #e8f4e8;
+  border-bottom: 1px solid #c8e6c9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sam-active-str {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: #2e7d32;
+  word-break: break-all;
+}
+
+.sam-extend-input {
+  flex: 1;
+  min-width: 80px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  border: 1px solid #2e7d32;
+  border-radius: 4px;
+  outline: none;
+}
+
+.sam-extend-input:focus {
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+}
+
+.sam-mode-tip {
+  font-size: 11px;
+  color: #888;
+  padding: 6px 20px;
+  border-bottom: 1px solid #eee;
 }
 
 /* ===== Form Groups ===== */
@@ -280,7 +322,6 @@ html, body, #root {
 /* ===== SAM Info Panel ===== */
 .sam-info-panel {
   border-top: 2px solid #e0e0e0;
-  overflow-y: auto;
 }
 
 .sam-table-wrap {

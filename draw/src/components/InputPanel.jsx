@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { GROUP_COLORS } from '../hooks/useGraphData';
 
-export default function InputPanel({ nodes, edges, onAddNode, onAddEdge, onImport, onBuildSAM }) {
+export default function InputPanel({
+  nodes, edges, onAddNode, onAddEdge, onImport, onBuildSAM,
+  samActive, samInputStr, onExtendSAM,
+}) {
   const [nodeId, setNodeId] = useState('');
   const [nodeLabel, setNodeLabel] = useState('');
   const [nodeGroup, setNodeGroup] = useState('默认');
@@ -11,6 +14,8 @@ export default function InputPanel({ nodes, edges, onAddNode, onAddEdge, onImpor
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState('');
   const [samInput, setSamInput] = useState('');
+  const [extendChars, setExtendChars] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleAddNode = () => {
     const label = nodeLabel.trim() || nodeId.trim();
@@ -33,7 +38,7 @@ export default function InputPanel({ nodes, edges, onAddNode, onAddEdge, onImpor
       const data = JSON.parse(jsonText);
       const ok = onImport(data);
       if (ok) setJsonText('');
-      else setJsonError('JSON 格式错误: 需要 {nodes: [...], edges: [...]}');
+      else setJsonError('JSON 格式错误');
     } catch (e) {
       setJsonError('JSON 解析失败: ' + e.message);
     }
@@ -66,6 +71,35 @@ export default function InputPanel({ nodes, edges, onAddNode, onAddEdge, onImpor
     onBuildSAM(s);
   };
 
+  const handleExtend = () => {
+    const chars = extendChars.trim();
+    if (!chars) return;
+    onExtendSAM(chars);
+    setExtendChars('');
+  };
+
+  const handleFileImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        const ok = onImport(data);
+        if (ok) {
+          setJsonText(ev.target.result);
+          setJsonError('');
+        } else {
+          setJsonError('JSON 格式错误');
+        }
+      } catch (err) {
+        setJsonError('JSON 解析失败: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="panel-content">
       {/* SAM Builder Section */}
@@ -90,112 +124,124 @@ export default function InputPanel({ nodes, edges, onAddNode, onAddEdge, onImpor
         </div>
       </div>
 
-      {/* Node Section */}
-      <div className="panel-section">
-        <h3>添加节点</h3>
-        <div className="form-group">
-          <label>节点ID</label>
-          <input
-            value={nodeId}
-            onChange={e => setNodeId(e.target.value)}
-            placeholder="如 A, start (留空自动生成)"
-          />
-        </div>
-        <div className="form-group">
-          <label>显示标签</label>
-          <input
-            value={nodeLabel}
-            onChange={e => setNodeLabel(e.target.value)}
-            placeholder="如 入口节点"
-          />
-        </div>
-        <div className="form-group">
-          <label>分组</label>
-          <select value={nodeGroup} onChange={e => setNodeGroup(e.target.value)}>
-            {Object.keys(GROUP_COLORS).map(g => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
-        </div>
-        <button className="btn btn-primary btn-block" onClick={handleAddNode}>
-          添加节点
-        </button>
-        {nodes.length > 0 && (
-          <div className="node-list" style={{ marginTop: 8 }}>
-            已有节点: {nodes.map(n => (
-              <span key={n.id} style={{ marginRight: 8 }}>
-                <span
-                  className="group-color"
-                  style={{ background: GROUP_COLORS[n.group] || '#999' }}
-                />
-                {n.id}
-              </span>
-            ))}
+      {/* SAM Active Bar */}
+      {samActive && samInputStr && (
+        <>
+          <div className="sam-active-bar">
+            <span style={{ fontSize: 12, color: '#666' }}>当前:</span>
+            <span className="sam-active-str">{samInputStr}</span>
+            <input
+              className="sam-extend-input"
+              value={extendChars}
+              onChange={e => setExtendChars(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleExtend()}
+              placeholder="追加字符..."
+            />
+            <button className="btn btn-primary btn-sm" onClick={handleExtend}>
+              扩展
+            </button>
           </div>
-        )}
-      </div>
+          <div className="sam-mode-tip">已进入 SAM 模式，手动输入区已隐藏。字符追加后节点位置尽量保持。</div>
+        </>
+      )}
 
-      {/* Edge Section */}
-      <div className="panel-section">
-        <h3>添加有向边</h3>
-        {nodes.length < 2 ? (
-          <p style={{ fontSize: 12, color: '#999' }}>请先添加至少2个节点</p>
-        ) : (
-          <>
-            <div className="form-row">
-              <div className="form-group">
-                <label>起点</label>
-                <select value={edgeSource} onChange={e => setEdgeSource(e.target.value)}>
-                  <option value="">-- 选择 --</option>
-                  {nodes.map(n => <option key={n.id} value={n.id}>{n.label} ({n.id})</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>终点</label>
-                <select value={edgeTarget} onChange={e => setEdgeTarget(e.target.value)}>
-                  <option value="">-- 选择 --</option>
-                  {nodes.map(n => <option key={n.id} value={n.id}>{n.label} ({n.id})</option>)}
-                </select>
-              </div>
-            </div>
+      {/* Manual sections hidden in SAM mode */}
+      {!samActive && (
+        <>
+          {/* Node Section */}
+          <div className="panel-section">
+            <h3>添加节点</h3>
             <div className="form-group">
-              <label>权重</label>
+              <label>节点ID</label>
               <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={edgeWeight}
-                onChange={e => setEdgeWeight(e.target.value)}
-                placeholder="默认 1"
+                value={nodeId}
+                onChange={e => setNodeId(e.target.value)}
+                placeholder="如 A, start (留空自动生成)"
               />
             </div>
-            <button className="btn btn-primary btn-block" onClick={handleAddEdge}>
-              添加边
+            <div className="form-group">
+              <label>显示标签</label>
+              <input
+                value={nodeLabel}
+                onChange={e => setNodeLabel(e.target.value)}
+                placeholder="如 入口节点"
+              />
+            </div>
+            <div className="form-group">
+              <label>分组</label>
+              <select value={nodeGroup} onChange={e => setNodeGroup(e.target.value)}>
+                {Object.keys(GROUP_COLORS).map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+            <button className="btn btn-primary btn-block" onClick={handleAddNode}>
+              添加节点
             </button>
-          </>
-        )}
-        {edges.length > 0 && (
-          <div className="node-list" style={{ marginTop: 8 }}>
-            已有边: {edges.length} 条
+            {nodes.length > 0 && (
+              <div className="node-list" style={{ marginTop: 8 }}>
+                已有节点: {nodes.map(n => (
+                  <span key={n.id} style={{ marginRight: 8 }}>
+                    <span className="group-color" style={{ background: GROUP_COLORS[n.group] || '#999' }} />
+                    {n.id}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* JSON Import Section */}
-      <div className="panel-section">
-        <h3>JSON 批量导入</h3>
-        <textarea
-          className="json-textarea"
-          value={jsonText}
-          onChange={e => setJsonText(e.target.value)}
-          placeholder={`{"nodes":[{"id":"A","label":"节点A","group":"默认"}],"edges":[{"source":"A","target":"B","weight":5}]}`}
-        />
-        {jsonError && <p style={{ color: '#e74c3c', fontSize: 12, marginTop: 4 }}>{jsonError}</p>}
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <button className="btn btn-primary btn-sm" onClick={handleImport}>导入 JSON</button>
-          <button className="btn btn-outline btn-sm" onClick={handleLoadSample}>加载示例</button>
-        </div>
-      </div>
+          {/* Edge Section */}
+          <div className="panel-section">
+            <h3>添加有向边</h3>
+            {nodes.length < 2 ? (
+              <p style={{ fontSize: 12, color: '#999' }}>请先添加至少2个节点</p>
+            ) : (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>起点</label>
+                    <select value={edgeSource} onChange={e => setEdgeSource(e.target.value)}>
+                      <option value="">-- 选择 --</option>
+                      {nodes.map(n => <option key={n.id} value={n.id}>{n.label} ({n.id})</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>终点</label>
+                    <select value={edgeTarget} onChange={e => setEdgeTarget(e.target.value)}>
+                      <option value="">-- 选择 --</option>
+                      {nodes.map(n => <option key={n.id} value={n.id}>{n.label} ({n.id})</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>权重</label>
+                  <input type="number" min="0" step="0.1" value={edgeWeight}
+                    onChange={e => setEdgeWeight(e.target.value)} placeholder="默认 1" />
+                </div>
+                <button className="btn btn-primary btn-block" onClick={handleAddEdge}>添加边</button>
+              </>
+            )}
+            {edges.length > 0 && (
+              <div className="node-list" style={{ marginTop: 8 }}>已有边: {edges.length} 条</div>
+            )}
+          </div>
+
+          {/* JSON Import Section */}
+          <div className="panel-section">
+            <h3>JSON 批量导入</h3>
+            <textarea className="json-textarea" value={jsonText}
+              onChange={e => setJsonText(e.target.value)}
+              placeholder={`{"nodes":[...],"edges":[...]}`} />
+            {jsonError && <p style={{ color: '#e74c3c', fontSize: 12, marginTop: 4 }}>{jsonError}</p>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button className="btn btn-primary btn-sm" onClick={handleImport}>导入 JSON</button>
+              <button className="btn btn-outline btn-sm" onClick={() => fileInputRef.current?.click()}>选择文件</button>
+              <input ref={fileInputRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleFileImport} />
+              <button className="btn btn-outline btn-sm" onClick={handleLoadSample}>加载示例</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
