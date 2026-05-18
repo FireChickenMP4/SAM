@@ -1,3 +1,73 @@
+:root {
+  --bg-body: #f0f2f5;
+  --bg-sidebar: #fff;
+  --bg-sidebar-title: #fafbfc;
+  --bg-canvas: #fafbfc;
+  --bg-toolbar: #fff;
+  --bg-input: #fff;
+  --bg-input-disabled: #f5f5f5;
+  --bg-sam-builder: #f0f7ff;
+  --bg-sam-bar: #e8f4e8;
+  --bg-edit-popup: #fff;
+  --text-body: #1a1a2e;
+  --text-primary: #1a1a2e;
+  --text-secondary: #666;
+  --text-muted: #888;
+  --text-table: #333;
+  --border: #e0e0e0;
+  --border-light: #eee;
+  --border-table: #f0f0f0;
+  --border-input: #d9d9d9;
+  --border-sam-bar: #c8e6c9;
+  --color-json-bg: #fafbfc;
+  --hover-table: #f5f8ff;
+  --btn-outline-text: #555;
+  --btn-outline-hover: #f5f5f5;
+  --divider: #ddd;
+  --scrollbar-thumb: #ccc;
+  --sam-str-color: #2e7d32;
+  --sam-extend-border: #2e7d32;
+  --edge-label-bg: #fff;
+  --edge-label-color: #333;
+  --node-text-color: #fff;
+  --cy-bg: #fafbfc;
+}
+
+[data-theme="dark"] {
+  --bg-body: #181a1b;
+  --bg-sidebar: #1e2021;
+  --bg-sidebar-title: #1a1c1d;
+  --bg-canvas: #181a1b;
+  --bg-toolbar: #1e2021;
+  --bg-input: #2d2d2d;
+  --bg-input-disabled: #222;
+  --bg-sam-builder: #1a2125;
+  --bg-sam-bar: #1a251a;
+  --bg-edit-popup: #2d2d2d;
+  --text-body: #e8e6e3;
+  --text-primary: #e8e6e3;
+  --text-secondary: #b0aba0;
+  --text-muted: #888;
+  --text-table: #d0ccc7;
+  --border: #3a3c3d;
+  --border-light: #2e3031;
+  --border-table: #2a2b2c;
+  --border-input: #3a3c3d;
+  --border-sam-bar: #2a4a2a;
+  --color-json-bg: #1a1c1d;
+  --hover-table: #2a2c2d;
+  --btn-outline-text: #b0aba0;
+  --btn-outline-hover: #353535;
+  --divider: #353535;
+  --scrollbar-thumb: #353535;
+  --sam-str-color: #66bb6a;
+  --sam-extend-border: #66bb6a;
+  --edge-label-bg: #2d2d2d;
+  --edge-label-color: #e8e6e3;
+  --node-text-color: #fff;
+  --cy-bg: #181a1b;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,8 +78,8 @@ html, body, #root {
   width: 100%;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f0f2f5;
-  color: #1a1a2e;
+  background: var(--bg-body);
+  color: var(--text-body);
 }
 
 .app-container {
@@ -22,8 +92,8 @@ html, body, #root {
 .sidebar {
   width: 340px;
   min-width: 340px;
-  background: #fff;
-  border-right: 1px solid #e0e0e0;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
   overflow-y: auto;
 }
 
@@ -31,9 +101,9 @@ html, body, #root {
   padding: 16px 20px;
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a2e;
-  border-bottom: 1px solid #e0e0e0;
-  background: #fafbfc;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-sidebar-title);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -50,20 +120,20 @@ html, body, #root {
 /* ===== Panel Sections ===== */
 .panel-section {
   padding: 14px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .panel-section h3 {
   font-size: 13px;
   font-weight: 600;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 10px;
   letter-spacing: 0.5px;
 }
 
 /* ===== SAM Builder ===== */
 .sam-builder {
-  background: #f0f7ff;
+  background: var(--bg-sam-builder);
 }
 
 .sam-input {
@@ -75,7 +145,8 @@ html, body, #root {
   border: 1px solid #4B9CD3;
   border-radius: 4px;
   outline: none;
-  background: #fff;
+  background: var(--bg-input);
+  color: var(--text-body);
 }
 
 .sam-input:focus {
@@ -86,8 +157,8 @@ html, body, #root {
 /* ===== SAM Active Bar ===== */
 .sam-active-bar {
   padding: 10px 20px;
-  background: #e8f4e8;
-  border-bottom: 1px solid #c8e6c9;
+  background: var(--bg-sam-bar);
+  border-bottom: 1px solid var(--border-sam-bar);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -98,7 +169,7 @@ html, body, #root {
   font-size: 14px;
   font-weight: 700;
   font-family: 'Courier New', monospace;
-  color: #2e7d32;
+  color: var(--sam-str-color);
   word-break: break-all;
 }
 
@@ -108,9 +179,11 @@ html, body, #root {
   padding: 4px 8px;
   font-size: 13px;
   font-family: 'Courier New', monospace;
-  border: 1px solid #2e7d32;
+  border: 1px solid var(--sam-extend-border);
   border-radius: 4px;
   outline: none;
+  background: var(--bg-input);
+  color: var(--text-body);
 }
 
 .sam-extend-input:focus {
@@ -119,9 +192,9 @@ html, body, #root {
 
 .sam-mode-tip {
   font-size: 11px;
-  color: #888;
+  color: var(--text-muted);
   padding: 6px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 /* ===== Form Groups ===== */
@@ -132,7 +205,7 @@ html, body, #root {
 .form-group label {
   display: block;
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
@@ -141,11 +214,12 @@ html, body, #root {
   width: 100%;
   padding: 7px 10px;
   font-size: 13px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--border-input);
   border-radius: 4px;
   outline: none;
   transition: border-color 0.2s;
-  background: #fff;
+  background: var(--bg-input);
+  color: var(--text-body);
 }
 
 .form-group input:focus,
@@ -199,12 +273,12 @@ html, body, #root {
 }
 
 .btn-outline {
-  background: #fff;
-  color: #555;
-  border: 1px solid #d9d9d9;
+  background: var(--bg-input);
+  color: var(--btn-outline-text);
+  border: 1px solid var(--border-input);
 }
 .btn-outline:hover {
-  background: #f5f5f5;
+  background: var(--btn-outline-hover);
   border-color: #bbb;
 }
 
@@ -224,21 +298,21 @@ html, body, #root {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
 
 .toolbar-divider {
   width: 1px;
   height: 24px;
-  background: #ddd;
+  background: var(--divider);
   margin: 0 4px;
 }
 
 .toolbar-label {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -247,7 +321,7 @@ html, body, #root {
 .graph-container {
   flex: 1;
   position: relative;
-  background: #fafbfc;
+  background: var(--bg-canvas);
   overflow: hidden;
 }
 
@@ -259,10 +333,10 @@ html, body, #root {
 /* ===== Edit Popup ===== */
 .edit-popup {
   position: absolute;
-  background: #fff;
-  border: 1px solid #d9d9d9;
+  background: var(--bg-edit-popup);
+  border: 1px solid var(--border-input);
   border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   padding: 14px;
   min-width: 200px;
   z-index: 100;
@@ -271,7 +345,7 @@ html, body, #root {
 .edit-popup h4 {
   font-size: 13px;
   margin-bottom: 10px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .edit-popup .form-group {
@@ -291,11 +365,12 @@ html, body, #root {
   padding: 8px;
   font-size: 11px;
   font-family: 'Courier New', Courier, monospace;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--border-input);
   border-radius: 4px;
   resize: vertical;
   outline: none;
-  background: #fafbfc;
+  background: var(--color-json-bg);
+  color: var(--text-body);
 }
 
 .json-textarea:focus {
@@ -305,7 +380,7 @@ html, body, #root {
 /* ===== Node List for Edge Select ===== */
 .node-list {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
@@ -321,18 +396,18 @@ html, body, #root {
 
 /* ===== SAM Info Panel ===== */
 .sam-info-panel {
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid var(--border);
 }
 
 .sam-table-wrap {
   padding: 10px 14px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .sam-table-title {
   font-size: 12px;
   font-weight: 700;
-  color: #555;
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
@@ -345,8 +420,8 @@ html, body, #root {
 .sam-table th {
   text-align: left;
   padding: 3px 5px;
-  border-bottom: 2px solid #e0e0e0;
-  color: #888;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-muted);
   font-weight: 600;
   font-size: 10px;
   text-transform: uppercase;
@@ -354,18 +429,12 @@ html, body, #root {
 
 .sam-table td {
   padding: 2px 5px;
-  border-bottom: 1px solid #f0f0f0;
-  color: #333;
+  border-bottom: 1px solid var(--border-table);
+  color: var(--text-table);
 }
 
 .sam-table tbody tr:hover {
-  background: #f5f8ff;
-}
-
-/* ===== Cytoscape overrides ===== */
-.graph-container .cytoscape-container {
-  width: 100%;
-  height: 100%;
+  background: var(--hover-table);
 }
 
 /* ===== Scrollbar ===== */
@@ -376,6 +445,6 @@ html, body, #root {
   background: transparent;
 }
 .sidebar::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }

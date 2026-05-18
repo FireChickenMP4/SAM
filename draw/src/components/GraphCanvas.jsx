@@ -123,6 +123,7 @@ export default function GraphCanvas({
   onUpdateNode,
   onUpdateEdge,
   pendingPositions,
+  darkMode,
 }) {
   const containerRef = useRef(null);
   const [selected, setSelected] = useState(null);
@@ -173,6 +174,58 @@ export default function GraphCanvas({
   useEffect(() => {
     initCy();
   }, [initCy]);
+
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy) return;
+
+    if (darkMode) {
+      cy.style()
+        .selector('core')
+        .style('background-color', '#181a1b')
+        .selector('edge')
+        .style('line-color', '#999')
+        .style('target-arrow-color', '#999')
+        .style('text-background-color', '#2d2d2d')
+        .style('color', '#e8e6e3')
+        .selector('edge[edgeType="transition"]')
+        .style('line-color', '#aaa')
+        .style('target-arrow-color', '#aaa')
+        .selector('edge[edgeType="suffix_link"]')
+        .style('line-color', '#ff6b6b')
+        .style('target-arrow-color', '#ff6b6b')
+        .selector('node:selected')
+        .style('border-color', '#e8e6e3')
+        .selector('edge:selected')
+        .style('line-color', '#ff6b6b')
+        .style('target-arrow-color', '#ff6b6b')
+        .selector('edge[edgeType="transition"][?highWeight]')
+        .style('line-color', '#ccc')
+        .style('target-arrow-color', '#ccc')
+        .update();
+    } else {
+      cy.style()
+        .selector('core')
+        .style('background-color', '#fafbfc')
+        .selector('edge')
+        .style('line-color', '#888')
+        .style('target-arrow-color', '#888')
+        .style('text-background-color', '#fff')
+        .style('color', '#333')
+        .selector('edge[edgeType="transition"]')
+        .style('line-color', '#333')
+        .style('target-arrow-color', '#333')
+        .selector('edge[edgeType="suffix_link"]')
+        .style('line-color', '#e74c3c')
+        .style('target-arrow-color', '#e74c3c')
+        .selector('node:selected')
+        .style('border-color', '#333')
+        .selector('edge:selected')
+        .style('line-color', '#e74c3c')
+        .style('target-arrow-color', '#e74c3c')
+        .update();
+    }
+  }, [darkMode, cyRef]);
 
   useEffect(() => {
     const cy = cyRef.current;

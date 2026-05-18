@@ -6,6 +6,15 @@ import GraphCanvas from './components/GraphCanvas';
 import Toolbar from './components/Toolbar';
 import SamInfoPanel from './components/SamInfoPanel';
 
+function getTheme() {
+  try { return localStorage.getItem('graph-theme') || 'light'; } catch { return 'light'; }
+}
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  try { localStorage.setItem('graph-theme', t); } catch {}
+}
+
 export default function App() {
   const {
     nodes,
@@ -24,8 +33,19 @@ export default function App() {
   const [samView, setSamView] = useState('combined');
   const [samLabelFormat, setSamLabelFormat] = useState('len');
   const [samData, setSamData] = useState(null);
+  const [theme, setTheme] = useState(getTheme);
   const autoLoaded = useRef(false);
   const pendingPositions = useRef(null);
+
+  useEffect(() => { applyTheme(theme); }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(t => {
+      const next = t === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      return next;
+    });
+  }, []);
 
   const handleBuildSAM = useCallback((s, format = 'len') => {
     const cy = cyRef.current;
@@ -170,6 +190,8 @@ export default function App() {
           onSamViewChange={setSamView}
           samLabelFormat={samLabelFormat}
           onToggleLabelFormat={handleToggleLabelFormat}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
         <GraphCanvas
           cyRef={cyRef}
@@ -180,6 +202,7 @@ export default function App() {
           onUpdateNode={updateNode}
           onUpdateEdge={updateEdge}
           pendingPositions={pendingPositions}
+          darkMode={theme === 'dark'}
         />
       </div>
     </div>

@@ -10,7 +10,10 @@ const LAYOUTS = [
   { name: 'breadthfirst', label: '广度优先', opts: { name: 'breadthfirst', directed: true } },
 ];
 
-export default function Toolbar({ getCy, graphData, onClear, samData, samView, onSamViewChange, samLabelFormat, onToggleLabelFormat }) {
+export default function Toolbar({
+  getCy, graphData, onClear, samData, samView, onSamViewChange,
+  samLabelFormat, onToggleLabelFormat, theme, onToggleTheme,
+}) {
   const handleLayout = (layout) => {
     const cy = getCy();
     if (!cy || cy.nodes().length === 0) return;
@@ -20,7 +23,7 @@ export default function Toolbar({ getCy, graphData, onClear, samData, samView, o
   const handleExportPNG = () => {
     const cy = getCy();
     if (!cy) return;
-    exportPNG(cy);
+    exportPNG(cy, theme === 'dark');
   };
 
   const handleExportJSON = () => {
@@ -40,10 +43,7 @@ export default function Toolbar({ getCy, graphData, onClear, samData, samView, o
           <ViewToggle value={samView} onChange={onSamViewChange} />
           <span className="toolbar-divider" />
           <span className="toolbar-label">标签</span>
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={onToggleLabelFormat}
-          >
+          <button className="btn btn-outline btn-sm" onClick={onToggleLabelFormat}>
             {samLabelFormat === 'len' ? 'len' : '字符串'}
           </button>
           <span className="toolbar-divider" />
@@ -52,30 +52,24 @@ export default function Toolbar({ getCy, graphData, onClear, samData, samView, o
 
       <span className="toolbar-label">布局</span>
       {LAYOUTS.map(l => (
-        <button
-          key={l.name}
-          className="btn btn-outline btn-sm"
-          onClick={() => handleLayout(l)}
-        >
-          {l.label}
-        </button>
+        <button key={l.name} className="btn btn-outline btn-sm" onClick={() => handleLayout(l)}>{l.label}</button>
       ))}
 
       <span className="toolbar-divider" />
 
       <span className="toolbar-label">导出</span>
-      <button className="btn btn-outline btn-sm" onClick={handleExportPNG}>
-        PNG 图片
-      </button>
-      <button className="btn btn-outline btn-sm" onClick={handleExportJSON}>
-        JSON 数据
+      <button className="btn btn-outline btn-sm" onClick={handleExportPNG}>PNG</button>
+      <button className="btn btn-outline btn-sm" onClick={handleExportJSON}>JSON</button>
+
+      <span className="toolbar-divider" />
+
+      <button className="btn btn-outline btn-sm" onClick={onToggleTheme}>
+        {theme === 'light' ? '深色' : '浅色'}
       </button>
 
       <span className="toolbar-divider" />
 
-      <button className="btn btn-danger btn-sm" onClick={handleClear}>
-        清空画布
-      </button>
+      <button className="btn btn-danger btn-sm" onClick={handleClear}>清空</button>
     </div>
   );
 }
