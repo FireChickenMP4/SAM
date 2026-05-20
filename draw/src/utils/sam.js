@@ -9,6 +9,7 @@ export class SAM {
   }
 
   build(s) {
+    this.str = s;
     for (const ch of s) {
       this.extend(ch);
     }
@@ -77,6 +78,31 @@ export class SAM {
       }
     }
     return longest;
+  }
+
+  getEndpos() {
+    const n = this.next.length;
+    const endpos = Array.from({ length: n }, () => []);
+    const s = this.str || '';
+    let p = 0;
+    for (let i = 0; i < s.length; i++) {
+      p = this.next[p][s[i]];
+      endpos[p].push(i);
+    }
+
+    const order = Array.from({ length: n }, (_, i) => i)
+      .sort((a, b) => this.len[b] - this.len[a]);
+
+    for (const v of order) {
+      const u = this.link[v];
+      if (u >= 0 && endpos[v].length) {
+        for (const ep of endpos[v]) {
+          if (!endpos[u].includes(ep)) endpos[u].push(ep);
+        }
+        endpos[u].sort((a, b) => a - b);
+      }
+    }
+    return endpos;
   }
 
   toGraphData(format = 'len') {
